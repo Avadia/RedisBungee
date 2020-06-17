@@ -38,7 +38,7 @@ public class NameFetcher {
         return humanNames;
     }
 
-    public static class Name {
+    private static class Name {
         private String name;
         private long changedToAt;
     }

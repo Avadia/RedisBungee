@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
+import com.imaginarycode.minecraft.redisbungee.commands.*;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.util.IOUtil;
 import com.imaginarycode.minecraft.redisbungee.util.LuaManager;
@@ -44,34 +45,33 @@ import static com.google.common.base.Preconditions.checkArgument;
  * The only function of interest is {@link #getApi()}, which exposes some functions in this class.
  */
 public final class RedisBungee extends Plugin {
+    private static final Object SERVER_TO_PLAYERS_KEY = new Object();
     @Getter
     private static final Gson gson = new Gson();
     private static RedisBungeeAPI api;
     @Getter(AccessLevel.PACKAGE)
     private static PubSubListener psl = null;
+    @Getter()
+    private static RedisBungeeConfiguration configuration;
+    @Getter
+    private static OkHttpClient httpClient;
+    private final AtomicInteger nagAboutServers = new AtomicInteger();
+    private final AtomicInteger globalPlayerCount = new AtomicInteger();
+    private final Cache<Object, Multimap<String, UUID>> serverToPlayersCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(5, TimeUnit.SECONDS)
+            .build();
     @Getter
     private JedisPool pool;
     @Getter
     private UUIDTranslator uuidTranslator;
-    @Getter(AccessLevel.PACKAGE)
-    private static RedisBungeeConfiguration configuration;
     @Getter
     private DataManager dataManager;
-    @Getter
-    private static OkHttpClient httpClient;
     private volatile List<String> serverIds;
-    private final AtomicInteger nagAboutServers = new AtomicInteger();
-    private final AtomicInteger globalPlayerCount = new AtomicInteger();
     private Future<?> integrityCheck;
     private Future<?> heartbeatTask;
     private boolean usingLua;
     private LuaManager.Script serverToPlayersScript;
     private LuaManager.Script getPlayerCountScript;
-
-    private static final Object SERVER_TO_PLAYERS_KEY = new Object();
-    private final Cache<Object, Multimap<String, UUID>> serverToPlayersCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(5, TimeUnit.SECONDS)
-            .build();
 
     /**
      * Fetch the {@link RedisBungeeAPI} object created on plugin start.
@@ -86,7 +86,7 @@ public final class RedisBungee extends Plugin {
         return psl;
     }
 
-    final List<String> getServerIds() {
+    public final List<String> getServerIds() {
         return serverIds;
     }
 
@@ -294,17 +294,17 @@ public final class RedisBungee extends Plugin {
             }, 0, 3, TimeUnit.SECONDS);
             dataManager = new DataManager(this);
             if (configuration.isRegisterBungeeCommands()) {
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand(this));
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand(this));
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.IpCommand(this));
+                getProxy().getPluginManager().registerCommand(this, new GlistCommand(this));
+                getProxy().getPluginManager().registerCommand(this, new FindCommand(this));
+                getProxy().getPluginManager().registerCommand(this, new LastSeenCommand(this));
+                getProxy().getPluginManager().registerCommand(this, new IpCommand(this));
             }
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds());
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlayerProxyCommand(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlistCommand(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.DebugCommand(this));
+            getProxy().getPluginManager().registerCommand(this, new SendToAllCommand());
+            getProxy().getPluginManager().registerCommand(this, new ServerIdCommand());
+            getProxy().getPluginManager().registerCommand(this, new ServerIdsCommand());
+            getProxy().getPluginManager().registerCommand(this, new PlayerProxyCommand(this));
+            getProxy().getPluginManager().registerCommand(this, new PlistCommand(this));
+            getProxy().getPluginManager().registerCommand(this, new DebugCommand(this));
             api = new RedisBungeeAPI(this);
             getProxy().getPluginManager().registerListener(this, new RedisBungeeListener(this, configuration.getExemptAddresses()));
             getProxy().getPluginManager().registerListener(this, dataManager);
@@ -508,9 +508,8 @@ public final class RedisBungee extends Plugin {
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     class PubSubListener implements Runnable {
-        private JedisPubSubHandler jpsh;
-
         private final Set<String> addedChannels = new HashSet<>();
+        private JedisPubSubHandler jpsh;
 
         @Override
         public void run() {

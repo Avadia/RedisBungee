@@ -39,6 +39,7 @@ public class DataManager implements Listener {
     private final Cache<UUID, String> proxyCache = createCache();
     private final Cache<UUID, InetAddress> ipCache = createCache();
     private final Cache<UUID, Long> lastOnlineCache = createCache();
+    private final JsonParser parser = new JsonParser();
 
     public DataManager(RedisBungee plugin) {
         this.plugin = plugin;
@@ -51,8 +52,6 @@ public class DataManager implements Listener {
                 .expireAfterWrite(1, TimeUnit.HOURS)
                 .build();
     }
-
-    private final JsonParser parser = new JsonParser();
 
     public String getServer(final UUID uuid) {
         ProxiedPlayer player = plugin.getProxy().getPlayer(uuid);
