@@ -47,6 +47,7 @@ public class RedisBungeeListener implements Listener {
     public void onLogin(final LoginEvent event) {
         event.registerIntent(plugin);
         plugin.getProxy().getScheduler().runAsync(plugin, new RedisCallable<Void>(plugin) {
+            @SuppressWarnings("deprecation")
             @Override
             protected Void call(Jedis jedis) {
                 try {
@@ -93,6 +94,7 @@ public class RedisBungeeListener implements Listener {
     @EventHandler
     public void onPostLogin(final PostLoginEvent event) {
         plugin.getProxy().getScheduler().runAsync(plugin, new RedisCallable<Void>(plugin) {
+            @SuppressWarnings("deprecation")
             @Override
             protected Void call(Jedis jedis) {
                 jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
@@ -131,6 +133,7 @@ public class RedisBungeeListener implements Listener {
         });
     }
 
+    @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPing(final ProxyPingEvent event) {
         if (exemptAddresses.contains(event.getConnection().getAddress().getAddress())) {
@@ -152,6 +155,7 @@ public class RedisBungeeListener implements Listener {
             final String currentChannel = event.getTag();
             final byte[] data = Arrays.copyOf(event.getData(), event.getData().length);
             plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
+                @SuppressWarnings("UnstableApiUsage")
                 @Override
                 public void run() {
                     ByteArrayDataInput in = ByteStreams.newDataInput(data);
@@ -259,6 +263,7 @@ public class RedisBungeeListener implements Listener {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void serializeMultimap(Multimap<String, String> collection, boolean includeNames, ByteArrayDataOutput output) {
         output.writeInt(collection.keySet().size());
         for (Map.Entry<String, Collection<String>> entry : collection.asMap().entrySet()) {

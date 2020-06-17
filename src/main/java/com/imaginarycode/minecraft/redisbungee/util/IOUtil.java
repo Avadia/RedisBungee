@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class IOUtil {
+    @SuppressWarnings("UnstableApiUsage")
     public static String readInputStreamAsString(InputStream is) {
         String string;
         try {

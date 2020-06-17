@@ -19,6 +19,7 @@ public class RedisBungeeConfiguration {
     @Getter
     private final List<InetAddress> exemptAddresses;
 
+    @SuppressWarnings("UnstableApiUsage")
     public RedisBungeeConfiguration(JedisPool pool, Configuration configuration) {
         this.pool = pool;
         this.serverId = configuration.getString("server-id");

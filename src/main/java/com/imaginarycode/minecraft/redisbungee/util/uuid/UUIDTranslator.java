@@ -186,7 +186,7 @@ public final class UUIDTranslator {
 
     @RequiredArgsConstructor
     @Getter
-    private class CachedUUIDEntry {
+    private static class CachedUUIDEntry {
         private final String name;
         private final UUID uuid;
         private final Calendar expiry;

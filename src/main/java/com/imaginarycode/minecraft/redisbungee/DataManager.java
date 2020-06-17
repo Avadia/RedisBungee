@@ -63,7 +63,7 @@ public class DataManager implements Listener {
         try {
             return serverCache.get(uuid, new Callable<String>() {
                 @Override
-                public String call() throws Exception {
+                public String call() {
                     try (Jedis tmpRsc = plugin.getPool().getResource()) {
                         return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "server"), "user not found");
                     }
@@ -86,7 +86,7 @@ public class DataManager implements Listener {
         try {
             return proxyCache.get(uuid, new Callable<String>() {
                 @Override
-                public String call() throws Exception {
+                public String call() {
                     try (Jedis tmpRsc = plugin.getPool().getResource()) {
                         return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "proxy"), "user not found");
                     }
@@ -100,6 +100,7 @@ public class DataManager implements Listener {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public InetAddress getIp(final UUID uuid) {
         ProxiedPlayer player = plugin.getProxy().getPlayer(uuid);
 
@@ -108,8 +109,9 @@ public class DataManager implements Listener {
 
         try {
             return ipCache.get(uuid, new Callable<InetAddress>() {
+                @SuppressWarnings("UnstableApiUsage")
                 @Override
-                public InetAddress call() throws Exception {
+                public InetAddress call() {
                     try (Jedis tmpRsc = plugin.getPool().getResource()) {
                         String result = tmpRsc.hget("player:" + uuid, "ip");
                         if (result == null)
@@ -135,10 +137,10 @@ public class DataManager implements Listener {
         try {
             return lastOnlineCache.get(uuid, new Callable<Long>() {
                 @Override
-                public Long call() throws Exception {
+                public Long call() {
                     try (Jedis tmpRsc = plugin.getPool().getResource()) {
                         String result = tmpRsc.hget("player:" + uuid, "online");
-                        return result == null ? -1 : Long.valueOf(result);
+                        return result == null ? -1 : Long.parseLong(result);
                     }
                 }
             });

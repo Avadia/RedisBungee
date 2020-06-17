@@ -15,12 +15,14 @@ import java.util.UUID;
 @VisibleForTesting
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RedisUtil {
+    @SuppressWarnings("SameParameterValue")
     protected static void createPlayer(ProxiedPlayer player, Pipeline pipeline, boolean fireEvent) {
         createPlayer(player.getPendingConnection(), pipeline, fireEvent);
         if (player.getServer() != null)
             pipeline.hset("player:" + player.getUniqueId().toString(), "server", player.getServer().getInfo().getName());
     }
 
+    @SuppressWarnings("deprecation")
     protected static void createPlayer(PendingConnection connection, Pipeline pipeline, boolean fireEvent) {
         Map<String, String> playerData = new HashMap<>(4);
         playerData.put("online", "0");
@@ -39,7 +41,7 @@ public class RedisUtil {
 
     public static void cleanUpPlayer(String player, Jedis rsc) {
         rsc.srem("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", player);
-        rsc.hdel("player:" + player, "server",  "ip", "proxy");
+        rsc.hdel("player:" + player, "server", "ip", "proxy");
         long timestamp = System.currentTimeMillis();
         rsc.hset("player:" + player, "online", String.valueOf(timestamp));
         rsc.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
