@@ -477,8 +477,8 @@ public final class RedisBungee extends Plugin {
                     @SuppressWarnings("deprecation")
                     @Override
                     public Void call() {
-                        httpClient = new OkHttpClient();
                         Dispatcher dispatcher = new Dispatcher(getExecutorService());
+                        httpClient = new OkHttpClient();
                         httpClient.setDispatcher(dispatcher);
                         NameFetcher.setHttpClient(httpClient);
                         UUIDFetcher.setHttpClient(httpClient);

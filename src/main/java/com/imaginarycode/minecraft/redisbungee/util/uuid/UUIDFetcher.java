@@ -5,10 +5,7 @@ import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.squareup.okhttp.*;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 /* Credits to evilmidget38 for this class. I modified it to use Gson. */
@@ -42,7 +39,7 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
             String body = RedisBungee.getGson().toJson(names.subList(i * 100, Math.min((i + 1) * 100, names.size())));
             Request request = new Request.Builder().url(PROFILE_URL).post(RequestBody.create(JSON, body)).build();
             ResponseBody responseBody = httpClient.newCall(request).execute().body();
-            String response = responseBody.string();
+            String response = Objects.requireNonNull(responseBody).string();
             responseBody.close();
             Profile[] array = RedisBungee.getGson().fromJson(response, Profile[].class);
             for (Profile profile : array) {

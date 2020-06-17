@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -24,7 +25,7 @@ public class NameFetcher {
         String url = "https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names";
         Request request = new Request.Builder().url(url).get().build();
         ResponseBody body = httpClient.newCall(request).execute().body();
-        String response = body.string();
+        String response = Objects.requireNonNull(body).string();
         body.close();
 
         Type listType = new TypeToken<List<Name>>() {
