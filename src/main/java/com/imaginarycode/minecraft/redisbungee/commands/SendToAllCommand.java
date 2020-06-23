@@ -9,7 +9,6 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
 
 public class SendToAllCommand extends Command {
-
     public SendToAllCommand() {
         super("sendtoall", "redisbungee.command.sendtoall", "rsendtoall");
     }

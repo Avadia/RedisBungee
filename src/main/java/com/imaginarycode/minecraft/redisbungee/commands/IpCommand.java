@@ -20,27 +20,24 @@ public class IpCommand extends Command {
 
     @Override
     public void execute(final CommandSender sender, final String[] args) {
-        plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
-            @Override
-            public void run() {
-                if (args.length > 0) {
-                    UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0], true);
-                    if (uuid == null) {
-                        sender.sendMessage(MessageUtil.PLAYER_NOT_FOUND);
-                        return;
-                    }
-                    InetAddress ia = RedisBungee.getApi().getPlayerIp(uuid);
-                    if (ia != null) {
-                        TextComponent message = new TextComponent();
-                        message.setColor(ChatColor.GREEN);
-                        message.setText(args[0] + " is connected from " + ia.toString() + ".");
-                        sender.sendMessage(message);
-                    } else {
-                        sender.sendMessage(MessageUtil.PLAYER_NOT_FOUND);
-                    }
-                } else {
-                    sender.sendMessage(MessageUtil.NO_PLAYER_SPECIFIED);
+        plugin.getProxy().getScheduler().runAsync(plugin, () -> {
+            if (args.length > 0) {
+                UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0], true);
+                if (uuid == null) {
+                    sender.sendMessage(MessageUtil.PLAYER_NOT_FOUND);
+                    return;
                 }
+                InetAddress ia = RedisBungee.getApi().getPlayerIp(uuid);
+                if (ia != null) {
+                    TextComponent message = new TextComponent();
+                    message.setColor(ChatColor.GREEN);
+                    message.setText(args[0] + " is connected from " + ia.toString() + ".");
+                    sender.sendMessage(message);
+                } else {
+                    sender.sendMessage(MessageUtil.PLAYER_NOT_FOUND);
+                }
+            } else {
+                sender.sendMessage(MessageUtil.NO_PLAYER_SPECIFIED);
             }
         });
     }

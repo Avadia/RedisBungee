@@ -20,27 +20,24 @@ public class FindCommand extends Command {
 
     @Override
     public void execute(final CommandSender sender, final String[] args) {
-        plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
-            @Override
-            public void run() {
-                if (args.length > 0) {
-                    UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0], true);
-                    if (uuid == null) {
-                        sender.sendMessage(MessageUtil.PLAYER_NOT_FOUND);
-                        return;
-                    }
-                    ServerInfo si = RedisBungee.getApi().getServerFor(uuid);
-                    if (si != null) {
-                        TextComponent message = new TextComponent();
-                        message.setColor(ChatColor.BLUE);
-                        message.setText(args[0] + " is on " + si.getName() + ".");
-                        sender.sendMessage(message);
-                    } else {
-                        sender.sendMessage(MessageUtil.PLAYER_NOT_FOUND);
-                    }
-                } else {
-                    sender.sendMessage(MessageUtil.NO_PLAYER_SPECIFIED);
+        plugin.getProxy().getScheduler().runAsync(plugin, () -> {
+            if (args.length > 0) {
+                UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0], true);
+                if (uuid == null) {
+                    sender.sendMessage(MessageUtil.PLAYER_NOT_FOUND);
+                    return;
                 }
+                ServerInfo si = RedisBungee.getApi().getServerFor(uuid);
+                if (si != null) {
+                    TextComponent message = new TextComponent();
+                    message.setColor(ChatColor.BLUE);
+                    message.setText(args[0] + " is on " + si.getName() + ".");
+                    sender.sendMessage(message);
+                } else {
+                    sender.sendMessage(MessageUtil.PLAYER_NOT_FOUND);
+                }
+            } else {
+                sender.sendMessage(MessageUtil.NO_PLAYER_SPECIFIED);
             }
         });
     }
